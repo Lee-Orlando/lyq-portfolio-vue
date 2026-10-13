@@ -31,10 +31,14 @@ jobs:
           cache: npm
 
       - name: 安装依赖
-        # 这里用 install 而不是 ci。npm ci 在部分环境会漏装 rollup / esbuild 的
-        # 平台原生包（它们是 optional dependency），构建时报
-        # "Cannot find module @rollup/rollup-<平台>"，退出码 1。
-        # install 会补齐这些可选依赖；因为有 package-lock.json，版本仍然是被锁住的。
+        # 用 install 而不是 ci：rollup / esbuild 的平台原生包是 optional dependency，
+        # npm ci 在跨平台场景下有已知 bug（npm/cli#4828）会漏装，构建时报
+        # "Cannot find module @rollup/rollup-linux-x64-gnu"，退出码 1。
+        # install 会补齐这些可选依赖；版本仍由 package-lock.json 锁住。
+        #
+        # 注意：package-lock.json 必须包含全部平台的 @rollup/rollup-* 条目（25 个）。
+        # 若曾在本机装依赖时中断过，lock 可能残缺，需要在无 lock、无 node_modules 的
+        # 干净状态下重新 npm install 生成，否则 Linux 构建机装不到对应平台包。
         run: npm install --no-audit --no-fund
 
       # site.config.js 含 CloudBase 环境 ID，不进仓库，构建时从仓库 Secrets 生成。
