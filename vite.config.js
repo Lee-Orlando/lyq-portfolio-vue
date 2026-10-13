@@ -17,6 +17,12 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 export default defineConfig({
     plugins: [vue()],
     root,
+    /**
+     * 部署到根目录时不用管；部署到子目录（GitHub Pages 的项目站点固定带仓库名，
+     * 例如 /lyq-portfolio-vue/）带上环境变量即可：BASE_PATH=/lyq-portfolio-vue/ npm run build
+     * 不写死是因为同一份代码可能部署到不同位置，路径前缀不该进源码。
+     */
+    base: process.env.BASE_PATH || '/',
     build: {
         outDir: 'dist',
         emptyOutDir: true,
