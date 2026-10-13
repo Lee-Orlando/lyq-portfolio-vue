@@ -31,8 +31,11 @@ jobs:
           cache: npm
 
       - name: 安装依赖
-        # 用 ci 而不是 install：严格按 package-lock.json 装，避免本地能跑线上装出别的版本
-        run: npm ci
+        # 这里用 install 而不是 ci。npm ci 在部分环境会漏装 rollup / esbuild 的
+        # 平台原生包（它们是 optional dependency），构建时报
+        # "Cannot find module @rollup/rollup-<平台>"，退出码 1。
+        # install 会补齐这些可选依赖；因为有 package-lock.json，版本仍然是被锁住的。
+        run: npm install --no-audit --no-fund
 
       # site.config.js 含 CloudBase 环境 ID，不进仓库，构建时从仓库 Secrets 生成。
       # 这样线上站点能连云端，而公开仓库里翻不到地址。
